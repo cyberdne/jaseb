@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+telethon
+python-socketio
+aiofiles
+sqlite3
+requests 

@@ -1,0 +1,13 @@
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f9fa; margin: 0; }
+header { background: #2d3e50; color: #fff; padding: 1em 2em; }
+.container { max-width: 900px; margin: 2em auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 2em; }
+h1, h2 { color: #2d3e50; }
+.btn { background: #2d3e50; color: #fff; border: none; padding: 0.5em 1.2em; border-radius: 4px; cursor: pointer; }
+.btn:disabled { background: #aaa; }
+input, select, textarea { padding: 0.5em; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 1em; width: 100%; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 2em; }
+th, td { padding: 0.7em; border-bottom: 1px solid #eee; }
+th { background: #f0f3f6; }
+.status-active { color: green; font-weight: bold; }
+.status-expired { color: red; font-weight: bold; }
+@media (max-width: 600px) { .container { padding: 1em; } th, td { font-size: 0.95em; } } 

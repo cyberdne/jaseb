@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JASEB Log</title>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial; margin: 2em; }
+    h1 { color: #2c3e50; }
+    ul { list-style: none; padding: 0; }
+    li { margin-bottom: 8px; padding: 8px; border-bottom: 1px solid #eee; }
+    .success { color: green; }
+    .fail { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Log Pengiriman JASEB</h1>
+  <ul id="log-list"></ul>
+  <script>
+    const ws = new WebSocket("ws://" + location.hostname + ":8000/ws/logs");
+    ws.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      const logList = document.getElementById("log-list");
+      const li = document.createElement("li");
+      li.innerHTML = `<b>${data.time}</b> | <b>${data.group_name}</b> | <span class='${data.status==="Success"?"success":"fail"}'>${data.status}</span>`;
+      logList.prepend(li);
+    };
+    // Load log awal
+    fetch("/logs").then(r=>r.json()).then(json=>{
+      json.logs.reverse().forEach(row=>{
+        const li = document.createElement("li");
+        li.innerHTML = `<b>${row[1]}</b> | <b>${row[2]}</b> | <span class='${row[3]==="Success"?"success":"fail"}'>${row[3]}</span>`;
+        document.getElementById("log-list").appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html> 

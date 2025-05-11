@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JASEB Dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>JASEB Telegram Auto Forwarder</h1>
+</header>
+<div class="container">
+  <h2>Manajemen Akun Userbot</h2>
+  <form id="add-account-form" enctype="multipart/form-data">
+    <input type="text" name="phone" placeholder="Nomor HP Telegram (628xxxx)" required>
+    <input type="number" name="masa_sewa" placeholder="Masa Sewa (hari)" required>
+    <input type="file" name="session_file" required>
+    <button class="btn" type="submit">Tambah Akun</button>
+  </form>
+  <table id="accounts-table">
+    <thead><tr><th>Nomor</th><th>Status</th><th>Masa Sewa</th><th>Expired</th><th>Aksi</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <h2>Konfigurasi Akun</h2>
+  <div id="config-section" style="display:none;">
+    <form id="config-form">
+      <input type="hidden" name="account_id">
+      <label>Teks Forward</label>
+      <textarea name="teks_forward" rows="2"></textarea>
+      <label>Watermark</label>
+      <input type="text" name="watermark">
+      <label>Auto Respon</label>
+      <textarea name="auto_respon" rows="2"></textarea>
+      <button class="btn" type="submit">Simpan Konfigurasi</button>
+    </form>
+  </div>
+  <h2>Log Pengiriman</h2>
+  <table id="log-table">
+    <thead><tr><th>Waktu</th><th>Grup</th><th>Status</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<script>
+// Ganti URL di bawah ini dengan URL backend Railway Anda jika sudah deploy
+const API_BASE = window.API_BASE || "https://jaseb-backend.up.railway.app";
+const api = (path, opts={}) => fetch(API_BASE + path, opts).then(r=>r.json());
+function loadAccounts() {
+  api('/accounts').then(data => {
+    const tbody = document.querySelector('#accounts-table tbody');
+    tbody.innerHTML = '';
+    data.accounts.forEach(acc => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${acc.phone}</td><td class="status-${acc.status}">${acc.status}</td><td>${acc.masa_sewa} hari</td><td>${acc.expired_at}</td><td><button class='btn' onclick='showConfig(${acc.id})'>Konfigurasi</button></td>`;
+      tbody.appendChild(tr);
+    });
+  });
+}
+function showConfig(account_id) {
+  api(`/accounts/${account_id}/config`).then(cfg => {
+    document.getElementById('config-section').style.display = '';
+    const f = document.getElementById('config-form');
+    f.account_id.value = account_id;
+    f.teks_forward.value = cfg.teks_forward || '';
+    f.watermark.value = cfg.watermark || '';
+    f.auto_respon.value = cfg.auto_respon || '';
+    loadLogs(account_id);
+  });
+}
+document.getElementById('add-account-form').onsubmit = function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  fetch(API_BASE + '/accounts', {method:'POST', body:fd}).then(()=>{loadAccounts(); this.reset();});
+};
+document.getElementById('config-form').onsubmit = function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  fetch(API_BASE + `/accounts/${fd.get('account_id')}/config`, {method:'POST', body:fd}).then(()=>alert('Tersimpan!'));
+};
+function loadLogs(account_id) {
+  api(`/logs?account_id=${account_id}`).then(data => {
+    const tbody = document.querySelector('#log-table tbody');
+    tbody.innerHTML = '';
+    data.logs.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${row.time}</td><td>${row.group_name}</td><td>${row.status}</td>`;
+      tbody.appendChild(tr);
+    });
+  });
+}
+loadAccounts();
+</script>
+</body>
+</html> 
